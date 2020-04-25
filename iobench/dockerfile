@@ -1,0 +1,7 @@
+# docker build -t maokeibox/bench  .
+# docker run -it --name bench1 maokeibox/bench
+FROM adoptopenjdk/openjdk11
+COPY ./target/benchmark.jar /usr/app/
+COPY testfiles /usr/app/testfiles
+WORKDIR /usr/app
+ENTRYPOINT ["java", "-jar", "benchmark.jar"]
