@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+#number of containers
 num=10
 
 removeAllContainers () {
@@ -15,17 +16,23 @@ countUpContainers () {
 	return $(docker ps -a | grep "maokeibox/iperfc" | grep "Up" | wc -l)
 }
 
-#Server on default port 5001
-#iperf -s -P 5001
-read -n 1 -s -r -p "Please start iperf server on 5001"
+dockerip () {
+  docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$@"
+}
+
+docker network create iperfnet
 #Docker pull image
+docker pull maokeibox/iperfs:latest
 docker pull maokeibox/iperfc:latest
-#Docker network named
-docker network create -d bridge --subnet 192.168.0.0/24 --gateway 192.168.0.1 dockernet
+#server
+docker run -d --name iperfs1 --network=iperfnet maokeibox/iperfs &
+sleep 2; 
+ip=$(dockerip iperfs1)
+echo "IP $ip"
 #Start iperf clients
 for (( i=1; i <= num; i++ ))
 do
-  docker run -d --name dperfc$i maokeibox/iperfc 192.168.0.1 &
+  docker run -d --name dperfc$i --network=iperfnet maokeibox/iperfc $ip &
 done
 
 #remove all containers
@@ -36,5 +43,8 @@ while [ $num -gt $exited ]; do
 	countExitedContainers
 	exited=$?
 done
+docker stop iperfs1
+docker logs iperfs1 > ~/iperfs.txt
 echo "All containers exited $exited"
 removeAllContainers
+docker network rm iperfnet
