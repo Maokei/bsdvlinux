@@ -6,6 +6,7 @@ import os, sys, argparse
 from time import perf_counter
 import uuid
 import random
+import threading
 
 NUGGET_BANNER = r'''
  _                                    _   
@@ -49,7 +50,7 @@ class IOTest:
     Class contains all methods needed to run a IO test
     '''
     def __init__(self, fileSizeMb, id, outfolder):
-        self.tempFile = "/tmp/test" + id
+        self.tempFile = "/tmp/test" + str(id)
         self.permission = 0o777
         self.wBlockSizeKb = 1024
         self.rBlockSizeKb = 512
@@ -83,7 +84,7 @@ class IOTest:
             self.fileSizeMb, readTime, readAvg, rMax, rMin)
         )
         print(rResStr)
-        outputf = 'result' + self.id + ".txt"
+        outputf = 'result' + str(self.id) + ".txt"
         self.saveResults(wResStr, rResStr, self.outfolder, outputf)
 
     def writeTestFile(self, blockSize, blockCount):
@@ -140,12 +141,18 @@ class IOTest:
     def getFilename(self):
         return str(uuid.uuid4())
 
+def work(size, id, out):
+    ioTest = IOTest(size, id, out)
+    ioTest.run()
+
 def main():
     print(NUGGET_BANNER)
     arguments = getArguments()
-    print(arguments)
-    ioTest = IOTest(arguments.size, '1', arguments.output)
-    ioTest.run()
+    threads = []
+    for i in range(arguments.threads):
+        t = threading.Thread(target=work, args=(arguments.threads, i, arguments.output))
+        threads.append(t)
+        t.start()
 
 if __name__ == "__main__":
     main()
