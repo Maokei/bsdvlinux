@@ -89,8 +89,7 @@ class IOTest:
             self.fileSizeMb, readTime, readAvg, rMax, rMin)
         )
         if self.cprint:
-            print("T " + str(self.id) + " : " + wResStr)
-            print("T " + str(self. id) + " : " + rResStr + "\n")
+            print("T " + str(self.id) + " : " + wResStr + rResStr + "\n")
         outputf = 'result' + str(self.id) + ".txt"
         self.saveResults(wResStr, rResStr, self.outfolder, outputf)
 
