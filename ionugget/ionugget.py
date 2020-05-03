@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Tested with python 3.7
 '''
@@ -43,28 +43,34 @@ def getArguments():
                             type=str,
                             default="/tmp/result",
                             help="Output folder path")
+    argparser.add_argument('-p',
+                            '--print',
+                            required=False,
+                            action='store',
+                            type=bool,
+                            default=True,
+                            help="Console output")
     return argparser.parse_args()
 
 class IOTest:
     '''
     Class contains all methods needed to run a IO test
     '''
-    def __init__(self, fileSizeMb, id, outfolder):
+    def __init__(self, fileSizeMb, id, outfolder, cprint):
         self.tempFile = "/tmp/test" + str(id)
         self.permission = 0o777
         self.wBlockSizeKb = 1024
         self.rBlockSizeKb = 512
         self.id = id
+        self.cprint = cprint
         self.outfolder = outfolder
         self.fileSizeMb = fileSizeMb
         self.wCount=int((self.fileSizeMb * 1024) / self.wBlockSizeKb)
         self.rCount=int((self.fileSizeMb * 1024 * 1024) / self.rBlockSizeKb)
 
     def run(self):
-        print("run: ", self.tempFile)
         writeRes = self.writeTestFile(self.wBlockSizeKb * 1024, self.wCount)
         readRes = self.readTestFile(self.rBlockSizeKb, self.rCount)
-        #write
         
         writeTime = sum(writeRes)
         writeAvg = (self.fileSizeMb / writeTime)
@@ -74,7 +80,6 @@ class IOTest:
                     'Max speed: {:.2f} Min speed: {:.2f}'.format(
             self.fileSizeMb, writeTime, writeAvg, wMax, wMin)
         )
-        print(wResStr)
         readTime = sum(readRes)
         readAvg = (self.fileSizeMb / readTime)
         rMax = self.rBlockSizeKb / (1024 * 1024 * min(readRes))
@@ -83,7 +88,9 @@ class IOTest:
                     'Max speed: {:.2f} Min speed: {:.2f}'.format(
             self.fileSizeMb, readTime, readAvg, rMax, rMin)
         )
-        print(rResStr)
+        if self.cprint:
+            print("T " + str(self.id) + " : " + wResStr)
+            print("T " + str(self. id) + " : " + rResStr + "\n")
         outputf = 'result' + str(self.id) + ".txt"
         self.saveResults(wResStr, rResStr, self.outfolder, outputf)
 
@@ -133,16 +140,17 @@ class IOTest:
     
     def saveResults(self, writeRes, readRes, outpath, filename):
         os.makedirs(outpath, exist_ok=True) 
-        output = open(outpath + "/" + filename, 'w')
+        output = open(outpath + "/" + filename, 'a')
         output.write(writeRes)
         output.write(readRes)
+        output.write("\n")
         output.close()
 
     def getFilename(self):
         return str(uuid.uuid4())
 
-def work(size, id, out):
-    ioTest = IOTest(size, id, out)
+def work(size, id, out, print):
+    ioTest = IOTest(size, id, out, print)
     ioTest.run()
 
 def main():
@@ -150,7 +158,7 @@ def main():
     arguments = getArguments()
     threads = []
     for i in range(arguments.threads):
-        t = threading.Thread(target=work, args=(arguments.threads, i, arguments.output))
+        t = threading.Thread(target=work, args=(arguments.size, i, arguments.output, arguments.print))
         threads.append(t)
         t.start()
 
