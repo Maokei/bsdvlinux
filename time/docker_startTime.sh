@@ -12,9 +12,9 @@ countExitedContainers () {
 	return $(docker ps -a | grep "maokeibox/time" | grep "Exited" | wc -l)
 }
 
-echo "First run creation run time:" >> ./timeToRun"$nrCont".txt
-date +%s.%N >> ./timeToRun"$nrCont".txt
-echo "Docker times:" >> ./timeToRun"$nrCont".txt
+#echo "First run creation run time:" >> ./timeToRun"$nrCont".txt
+#date +%s.%N >> ./timeToRun"$nrCont".txt
+#echo "Docker times:" >> ./timeToRun"$nrCont".txt
 # start Docker containers
 for ((i = 1; i <= nrCont; i++))
 do
@@ -28,12 +28,12 @@ while [ $nrCont -gt $exited ]; do
 	exited=$?
 done
 #Collect first results
-for ((i = 1; i <= nrCont; i++))
-do
-    docker logs timer$i >> ./timeToRun"$nrCont".txt
-done
+#for ((i = 1; i <= nrCont; i++))
+#do
+#    docker logs timer$i >> ./timeToRun"$nrCont".txt
+#done
 #Second run
-echo "Second run start time:" >> ./timeToRun"$nrCont".txt
+echo "Docker start time:" >> ./timeToRun"$nrCont".txt
 date +%s.%N >> ./timeToRun"$nrCont".txt
 echo "Docker times:" >> ./timeToRun"$nrCont".txt
 
