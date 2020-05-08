@@ -41,10 +41,10 @@ done
 #Collect second results
 for ((i = 1; i <= nrCont; i++))
 do
-	START=$(docker inspect --format='{{.State.StartedAt}}' timer$i | xargs date +%s%N -d)
-	FINISHED=$(docker inspect --format='{{.State.FinishedAt}}' timer$i | xargs date +%s%N -d)
+	START=$(docker inspect --format='{{.State.StartedAt}}' timer$i | xargs date +%s.%N -d)
+	FINISHED=$(docker inspect --format='{{.State.FinishedAt}}' timer$i | xargs date +%s.%N -d)
 	echo "S:$START F:$FINISHED" 
-	DIFF=$(($FINISHED - $START)) 
+	DIFF=$(echo "$FINISHED - $START" | bc -l) 
 	echo $DIFF >> ./timeToRunInspect"$nrCont".txt
 done
 #Cleanup
