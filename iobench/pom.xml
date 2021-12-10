@@ -12,7 +12,7 @@
         <jmh.version>1.23</jmh.version>
 		<javac.source>11</javac.source>
         <javac.target>11</javac.target>
-		<log4j.version>2.13.2</log4j.version>
+		<log4j.version>2.15.0</log4j.version>
         <uberjar.name>benchmark</uberjar.name>
     </properties>
 
